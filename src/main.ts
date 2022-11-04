@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import 'newrelic';
 
 const DEFAULT_PORT = 3000;
 

@@ -17,6 +17,7 @@ services:
       - tvc-network
     environment:
       PORT: 3001
+      NEW_RELIC_LICENSE_KEY: "REPLACE_WITH_NEW_RELIC_LICENSE_KEY"
 
 networks:
   tvc-network:
