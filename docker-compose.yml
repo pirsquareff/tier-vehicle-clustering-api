@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tvc-api
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - 3001:3001
+    networks:
+      - tvc-network
+    environment:
+      PORT: 3001
+
+networks:
+  tvc-network:
