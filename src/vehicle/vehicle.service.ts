@@ -1,17 +1,9 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { catchError, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { FETCH_VEHICLES_ENDPOINT } from 'src/common/constants';
-import { GBFSResponse } from 'src/common/dto/gbfs-response.dto';
+import { TierGBFSInternalCacheGenericRepository } from 'src/core/repository/tier-gbfs-internal-cache-generic-repository';
 import { PricingPlanService } from 'src/pricing-plan/pricing-plan.service';
 import { VehicleTypeService } from 'src/vehicle-type/vehicle-type.service';
 import { VehicleFilterBuilder } from './filter/vehicle-filter';
-import {
-  Vehicle,
-  VehicleCollection,
-  VehicleCollectionGBFSResponseMapper,
-} from './vehicle.dto';
+import { Vehicle } from './vehicle.dto';
 
 type GetVehiclesParameters = {
   lat?: number;
@@ -25,28 +17,20 @@ type GetVehiclesParameters = {
 @Injectable()
 export class VehicleService {
   constructor(
-    private readonly httpService: HttpService,
+    private readonly vehicleRepository: TierGBFSInternalCacheGenericRepository<Vehicle>,
     private readonly vehicleTypeService: VehicleTypeService,
     private readonly pricingPlanService: PricingPlanService,
   ) {}
 
-  public async getVehiclesExpanded({
+  public async getVehicles({
     lat,
     lon,
     searchRadius,
     minimumRangeMeters,
     reserved,
     disabled,
-  }: GetVehiclesParameters) {
-    const vehiclesPromise = this.getVehicles();
-    const vehicleTypesPromise = this.vehicleTypeService.getVehicleTypes();
-    const pricingPlansPromise = this.pricingPlanService.getPricingPlans();
-
-    const [vehicles, vehicleTypes, pricingPlans] = await Promise.all([
-      vehiclesPromise,
-      vehicleTypesPromise,
-      pricingPlansPromise,
-    ]);
+  }: GetVehiclesParameters): Promise<Vehicle[]> {
+    const vehicles = await this.vehicleRepository.getAll();
 
     const filters = new VehicleFilterBuilder()
       .startingLat(lat)
@@ -57,30 +41,27 @@ export class VehicleService {
       .isDisabled(disabled)
       .build();
 
-    // TODO: expand vehicle type and pricing plan
+    const filteredVehicles = vehicles.filter(filters.getPredicateFn());
 
-    return {
-      vehicles: vehicles.filter(filters.getPredicateFn()),
-      vehicleTypes,
-      pricingPlans,
-    };
-  }
-
-  public async getVehicles() {
-    return await firstValueFrom(
-      this.httpService.get(FETCH_VEHICLES_ENDPOINT).pipe(
-        map((response) => this.parseRaw(response.data)),
-        catchError((error) => {
-          console.log(error);
-          throw 'An error happened!';
-        }),
-      ),
+    return Promise.all(
+      filteredVehicles.map((vehicle) => this._expandNestedReources(vehicle)),
     );
   }
 
-  private parseRaw(raw: any): Vehicle[] {
-    const response: GBFSResponse<VehicleCollection> =
-      VehicleCollectionGBFSResponseMapper.toDomain(raw);
-    return response.data.vehicles;
+  public async getVehicle(id: string): Promise<Vehicle> {
+    const vehicle = await this.vehicleRepository.get(id);
+    return this._expandNestedReources(vehicle);
+  }
+
+  private async _expandNestedReources(vehicle: Vehicle): Promise<Vehicle> {
+    return {
+      ...vehicle,
+      vehicleType: await this.vehicleTypeService.getVehicleType(
+        vehicle.vehicleTypeId,
+      ),
+      pricingPlan: await this.pricingPlanService.getPricingPlan(
+        vehicle.pricingPlanId,
+      ),
+    };
   }
 }

@@ -1,34 +1,18 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom, map, catchError } from 'rxjs';
-import { FETCH_PRICING_PLANS_ENDPOINT } from 'src/common/constants';
-import { GBFSResponse } from 'src/common/dto/gbfs-response.dto';
-import {
-  PricingPlan,
-  PricingPlanCollection,
-  PricingPlanCollectionGBFSResponseMapper,
-} from './pricing-plan.dto';
+import { TierGBFSInternalCacheGenericRepository } from 'src/core/repository/tier-gbfs-internal-cache-generic-repository';
+import { PricingPlan } from './pricing-plan.dto';
 
 @Injectable()
 export class PricingPlanService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly pricingPlanRepository: TierGBFSInternalCacheGenericRepository<PricingPlan>,
+  ) {}
 
-  public async getPricingPlans() {
-    // Fetch system pricing plan
-    return await firstValueFrom(
-      this.httpService.get(FETCH_PRICING_PLANS_ENDPOINT).pipe(
-        map((response) => this.parseRaw(response.data)),
-        catchError((error) => {
-          console.log(error);
-          throw 'An error happened!';
-        }),
-      ),
-    );
+  public getPricingPlans(): Promise<PricingPlan[]> {
+    return this.pricingPlanRepository.getAll();
   }
 
-  private parseRaw(raw: any): PricingPlan[] {
-    const response: GBFSResponse<PricingPlanCollection> =
-      PricingPlanCollectionGBFSResponseMapper.toDomain(raw);
-    return response.data.plans;
+  public getPricingPlan(id: string): Promise<PricingPlan> {
+    return this.pricingPlanRepository.get(id);
   }
 }
