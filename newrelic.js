@@ -51,4 +51,7 @@ exports.config = {
       'response.headers.x*',
     ],
   },
+  distributed_tracing: {
+    enabled: true,
+  },
 };
