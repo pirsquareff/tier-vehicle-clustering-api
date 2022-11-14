@@ -1,9 +1,18 @@
-import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Res,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Response } from 'express';
+import { ResponseWrapperInterceptor } from 'src/core/interceptor/response-wrapper.interceptor';
 import { PricingPlanDTO, PricingPlanMapper } from './pricing-plan.dto';
 import { PricingPlanService } from './pricing-plan.service';
 
 @Controller('pricing-plans')
+@UseInterceptors(ResponseWrapperInterceptor)
 export class PricingPlanController {
   constructor(private readonly pricingPlanService: PricingPlanService) {}
 

@@ -1,30 +1,27 @@
-import { Controller, Get, HttpStatus, Param, Query, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Query,
+  Res,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Response } from 'express';
-import { VehicleDTO, VehicleMapper } from './vehicle.dto';
+import { ResponseWrapperInterceptor } from 'src/core/interceptor/response-wrapper.interceptor';
+import { GetVehiclesDTO, VehicleDTO, VehicleMapper } from './vehicle.dto';
 import { VehicleService } from './vehicle.service';
 
 @Controller('vehicles')
+@UseInterceptors(ResponseWrapperInterceptor)
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Get()
   public async getVehicles(
-    @Query('lat') lat?: number,
-    @Query('lon') lon?: number,
-    @Query('search-radius') searchRadius?: number,
-    @Query('range-meters') minimumRangeMeters?: number,
-    @Query('reserved') reserved?: boolean,
-    @Query('disabled') disabled?: boolean,
+    @Query() query: GetVehiclesDTO,
   ): Promise<VehicleDTO[]> {
-    const vehicles = await this.vehicleService.getVehicles({
-      lat,
-      lon,
-      searchRadius,
-      minimumRangeMeters,
-      reserved,
-      disabled,
-    });
-
+    const vehicles = await this.vehicleService.getVehicles(query);
     return vehicles.map(VehicleMapper.toDTO);
   }
 

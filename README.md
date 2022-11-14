@@ -33,12 +33,13 @@ This is sufficient as a starting point. When the service is horizontally scaled 
 ### Available Endpoints
 - GET /vehicles
   - Query parameters
-      - lat (optional): Latitude of a location where you want to search for vehicles.
-      - lon (optional): Longitude of a location where you want to search for vehicles.
-      - searchRadius (optional): Radius of the search zone in meter.
-      - minimumRangeMeters (optional)
-      - reserved (optional)
-      - disabled (optional)
+      - `lat` (optional): Latitude of a location where you want to search for vehicles.
+      - `lon` (optional): Longitude of a location where you want to search for vehicles.
+      - `search_radius` (optional): Radius of the search zone in meter. If `search_redius` is `0` or not provided, all vehicles will be returned.
+      - `vehicle_type_ids` (optional): a comma-separated list of vehicle type IDs.
+      - `minimum_range_meters` (optional)
+      - `reserved` (optional)
+      - `disabled` (optional)
 - GET /vehicles/:id
 - GET /vehicle-types
 - GET /vehicle-types/:id

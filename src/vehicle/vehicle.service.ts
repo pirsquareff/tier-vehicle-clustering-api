@@ -9,6 +9,8 @@ type GetVehiclesParameters = {
   lat?: number;
   lon?: number;
   searchRadius?: number;
+  vehicleTypeId?: string;
+  vehicleTypeIds?: string[];
   minimumRangeMeters?: number;
   reserved?: boolean;
   disabled?: boolean;
@@ -26,6 +28,7 @@ export class VehicleService {
     lat,
     lon,
     searchRadius,
+    vehicleTypeIds,
     minimumRangeMeters,
     reserved,
     disabled,
@@ -36,6 +39,7 @@ export class VehicleService {
       .startingLat(lat)
       .startingLon(lon)
       .searchRadius(searchRadius)
+      .vehicleTypeIds(vehicleTypeIds)
       .minimumRangeMeter(minimumRangeMeters)
       .isReserved(reserved)
       .isDisabled(disabled)

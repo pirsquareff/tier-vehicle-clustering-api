@@ -1,9 +1,18 @@
-import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Res,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Response } from 'express';
+import { ResponseWrapperInterceptor } from 'src/core/interceptor/response-wrapper.interceptor';
 import { VehicleTypeDTO, VehicleTypeMapper } from './vehicle-type.dto';
 import { VehicleTypeService } from './vehicle-type.service';
 
 @Controller('vehicle-types')
+@UseInterceptors(ResponseWrapperInterceptor)
 export class VehicleTypeController {
   constructor(private readonly vehicleTypeService: VehicleTypeService) {}
 

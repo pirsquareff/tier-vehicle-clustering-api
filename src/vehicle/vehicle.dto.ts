@@ -1,3 +1,15 @@
+import { Expose, Transform, Type } from 'class-transformer';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsLatitude,
+  IsLongitude,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Indexable, Mapper } from 'src/core/interfaces';
 import {
   PricingPlan,
@@ -65,4 +77,68 @@ export class VehicleMapper implements Mapper<Vehicle, VehicleDTO> {
       rentalUris: domain.rentalUris,
     };
   }
+}
+
+export class GetVehiclesDTO {
+  @IsOptional()
+  @IsLatitude()
+  @Type(() => Number)
+  @Expose({ name: 'lat' })
+  lat?: number;
+
+  @IsOptional()
+  @IsLongitude()
+  @Type(() => Number)
+  @Expose({ name: 'lon' })
+  lon?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0, {
+    message: 'search_radius must be a number greater than or equal 0',
+  })
+  @Expose({ name: 'search_radius' })
+  searchRadius?: number;
+
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value !== 'undefined'
+      ? value
+          .trim()
+          .split(',')
+          .filter((id: string) => id !== '')
+      : undefined,
+  )
+  @Expose({ name: 'vehicle_type_ids' })
+  vehicleTypeIds?: string[];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0, {
+    message: 'mininum_range_meters must be a number greater than or equal 0',
+  })
+  @Expose({ name: 'mininum_range_meters' })
+  minimumRangeMeters?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  @Expose({ name: 'reserved' })
+  reserved?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  @Expose({ name: 'disabled' })
+  disabled?: boolean;
 }

@@ -5,6 +5,7 @@ export class VehicleFilter {
   startingLat?: number;
   startingLon?: number;
   searchRadius?: number;
+  vehicleTypeIds?: Set<string>;
   minimumRangeMeters?: number;
   isReserved?: boolean;
   isDisabled?: boolean;
@@ -34,6 +35,13 @@ export class VehicleFilter {
         ) {
           return false;
         }
+      }
+
+      if (
+        typeof this.vehicleTypeIds !== 'undefined' &&
+        !this.vehicleTypeIds.has(vehicle.vehicleTypeId)
+      ) {
+        return false;
       }
 
       if (
@@ -81,6 +89,13 @@ export class VehicleFilterBuilder {
 
   public searchRadius(searchRadius: number): VehicleFilterBuilder {
     this._filter.searchRadius = searchRadius;
+    return this;
+  }
+
+  public vehicleTypeIds(vehicleTypeIds: string[]): VehicleFilterBuilder {
+    if (typeof vehicleTypeIds !== 'undefined') {
+      this._filter.vehicleTypeIds = new Set(vehicleTypeIds);
+    }
     return this;
   }
 
